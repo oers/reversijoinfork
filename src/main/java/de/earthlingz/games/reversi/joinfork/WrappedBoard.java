@@ -49,20 +49,15 @@ public class WrappedBoard extends Board {
      * @return 
      */
     public STATE getState(String string) {
-        Pattern p = Pattern.compile(string + "[w|b|o]?,"); //w-->white, b-->black, o-->possible move
-        Matcher m = p.matcher(getBoard());
-        if (m.find()) {
-            String state = m.group().substring(2, 3);
-            switch (state) {
-                case "w":
-                    return STATE.WHITE;
-                case "b":
-                    return STATE.BLACK;
-                case "o":
-                    return STATE.SELECTABLE;
-            }
+        if(string == null)
+        {
+            return null;
         }
-        return null;
+        
+        String local = string.toLowerCase();
+        int column = local.charAt(0) - (int) 'a';
+        int row = Integer.parseInt(local.substring(1, 2)) - 1;
+        return getState(row,column);
     }
 
     public String backpose() {

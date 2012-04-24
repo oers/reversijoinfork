@@ -44,7 +44,8 @@ public class ReplayTest {
         b.getBoard();
         Assert.assertEquals("C1".toLowerCase(), b.getLastMove());
         Assert.assertEquals(0, b.getWhiteStones());
-        Assert.assertEquals(62, b.getBlackStones()); //2 empty fields     
+        Assert.assertEquals(62, b.getBlackStones()); //2 empty fields  
+        Assert.assertEquals(b.getState("C1"), Board.STATE.BLACK);
         Logger.getRootLogger().setLevel(Level.TRACE);
     }
 
@@ -76,7 +77,6 @@ public class ReplayTest {
         Assert.assertEquals("A8".toLowerCase(), b.getLastMove());
         Assert.assertEquals(20, b.getBlackStones());
         Assert.assertEquals(44, b.getWhiteStones());
-
     }
     
     @Test
@@ -84,14 +84,14 @@ public class ReplayTest {
         //WOC 2010, round 1
         //DE GRAAF Jan C. 	40
         //HELMES Jiska
-        WrappedBoard b = WrappedBoard.replay(split("F5F6E6F4E3D6C5F3G4E2G5G6C7C3D3C2D2C6F7B5F1H4H3H5E7D7B3E1B4F8C1G1A5D8B6A6F2H2G3C8E8A4C4G2H1D1A3A2B2A1B1B7H6H7H8G7G8B8A7A8"));
+        WrappedBoard b = WrappedBoard.replay(split("F5F6E6F4E3D6C5F3G4E2G5G6C7C3D3C2D2C6F7B5F1H4H3H5E7D7B3E1B4F8"));
         b.markNextMoves();
         String transposed = b.getBoard();
         WrappedBoard backposed = WrappedBoard.createBoard(transposed, b.isNextPlayerBlack());
         backposed.markNextMoves();
         backposed.getBoard();
-        Assert.assertEquals(40, backposed.getBlackStones());
-        Assert.assertEquals(24, backposed.getWhiteStones());
+        Assert.assertEquals(12, backposed.getBlackStones());
+        Assert.assertEquals(22, backposed.getWhiteStones());
 
     }
 
