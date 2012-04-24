@@ -22,16 +22,7 @@ package de.earthlingz.games.reversi.joinfork;
         return hor;
     }
 
-    public void setHor(int hor) {
-        this.hor = hor;
-    }
-
     public int getVer() {
         return ver;
-    }
-
-    public void setVer(int ver) {
-        this.ver = ver;
-    }
-    
+    } 
 }
