@@ -18,9 +18,9 @@ public class Board {
 
         WHITE, BLACK, SELECTABLE
     }
-    protected LinkedList<BoardMove> moves = new LinkedList<>();
-    protected STATE[][] boolboard;
-    protected boolean nextPlayerBlack = true;
+    private LinkedList<BoardMove> moves = new LinkedList<>();
+    private STATE[][] boolboard;
+    private boolean nextPlayerBlack = true;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
 
@@ -59,28 +59,28 @@ public class Board {
         //assume that skipCheck = true is only used when you are sure that values passed here are legal Moves
         if (!skipCheck && moves.contains(move)) {
             log.warn("Move already made: " + move.toString());
-            markNextMoves(boolboard, nextPlayerBlack);
+            markNextMoves();
             return false;
-        } else if (skipCheck || isLegalMove(boolboard, row, column, nextPlayerBlack)) //next player means last player now
+        } else if (skipCheck || isLegalMove(row, column)) //next player means last player now
         {
             moves.add(move);
-            boolean flipped = flip(boolboard, row, column, nextPlayerBlack ? STATE.BLACK : STATE.WHITE);
+            boolean flipped = flip(row, column);
             if (!flipped) {
                 return false;
             }
             if(log.isDebugEnabled()) {log.debug("Flipped: " + toString(boolboard));}
         } else {
             log.warn("IllegalMove: " + move.toString());
-            markNextMoves(boolboard, nextPlayerBlack);
+            markNextMoves();
             return false;
         }
 
         //first Move is Black
         if (nextPlayerBlack) {
             nextPlayerBlack = false;
-            boolean canMove = markNextMoves(boolboard, nextPlayerBlack);
+            boolean canMove = markNextMoves();
             if (!canMove) {
-                canMove = markNextMoves(boolboard, !nextPlayerBlack);
+                canMove = markNextMoves();
                 if (canMove) {
                     if(log.isDebugEnabled()) {log.debug("White has to skip");}
                     nextPlayerBlack = true;
@@ -93,9 +93,9 @@ public class Board {
 
         } else {
             nextPlayerBlack = true;
-            boolean canMove = markNextMoves(boolboard, nextPlayerBlack);
+            boolean canMove = markNextMoves();
             if (!canMove) {
-                canMove = markNextMoves(boolboard, !nextPlayerBlack);
+                canMove = markNextMoves();
                 if (canMove) {
                     if(log.isDebugEnabled()) {log.debug("Black has to skip");}
                     nextPlayerBlack = false;
@@ -113,61 +113,25 @@ public class Board {
         return true;
     }
 
-    public static boolean isLegalMove(STATE[][] board, int row, int column, boolean black) {
-
-        STATE flip;
-        STATE endFlip;
-        if (black) {
-            flip = STATE.WHITE;
-            endFlip = STATE.BLACK;
-        } else {
-            flip = STATE.BLACK;
-            endFlip = STATE.WHITE;
-        }
-
-        for (Direction dir : Direction.values()) {
-            int nextRow = row + dir.getHor();
-            if (nextRow == -1 || nextRow == 8) {
-                continue; //at the end of the board
-            }
-            int nextColumn = column + dir.getVer();
-            if (nextColumn == -1 || nextColumn == 8) {
-                continue; //at the end of the board
-            }
-            if (board[nextRow][nextColumn] == flip) {
-                boolean flipFound = false;
-                //can be flipped, if we can find a beginning i.e. stone of other colour in same direction
-                while (true) //can't think of an appropiate recursion end right now
-                {
-                    nextRow = nextRow + dir.getHor();
-                    if (nextRow == -1 || nextRow == 8) {
-                        break; //at the end of the board
-                    }
-                    nextColumn = nextColumn + dir.getVer();
-                    if (nextColumn == -1 || nextColumn == 8) {
-                        break; //at the end of the board
-                    }
-                    //if we find an empty field break;
-                    if (board[nextRow][nextColumn] != STATE.BLACK && board[nextRow][nextColumn] != STATE.WHITE) {
-                        break;
-                    }
-
-                    if (board[nextRow][nextColumn] == endFlip) {
-                        flipFound = true;
-                        break;
-                    }
-                }
-                if(log.isTraceEnabled()){log.trace(row + " - " + column + ": " + flipFound);}
-                if (flipFound) {
-                    return true;
-                }
-            }
-        }
-        if(log.isTraceEnabled()){log.trace(row + " - " + column + ": False");}
-        return false;
+    public boolean isLegalMove(int row, int column)
+    {
+        return flip(row, column, nextPlayerBlack ? STATE.BLACK : STATE.WHITE, false); //don't flip just check  
     }
 
-    private boolean flip(STATE[][] board, int row, int column, STATE endflip) {
+    public boolean flip(int row, int column) {
+        return flip(row, column, nextPlayerBlack ? STATE.BLACK : STATE.WHITE, true);
+    }
+    
+    /**
+     * Flips all Stones on the board for the given move.
+     * @param board
+     * @param row the row of the move
+     * @param column the column of the move
+     * @param endflip the desired stone that makes the flip
+     * @param executeFlip if false then only a check is performed, no actual flipping is done
+     * @return 
+     */
+    private boolean flip( int row, int column, STATE endflip, boolean executeFlip) {
         STATE flip = (endflip == STATE.BLACK) ? STATE.WHITE : STATE.BLACK;
 
         boolean flipped = false;
@@ -189,7 +153,7 @@ public class Board {
                 continue; //at the end of the board
             }
             
-            if (board[nextRow][nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
+            if (boolboard[nextRow][nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
                 if (log.isTraceEnabled()) {
                     log.trace("Flip candidate found for " + dir);
                 }
@@ -206,11 +170,15 @@ public class Board {
                         break; //at the end of the board
                     }
                     //if we find an empty field break;
-                    if (board[nextRow][nextColumn] != STATE.BLACK && board[nextRow][nextColumn] != STATE.WHITE) {
+                    if (boolboard[nextRow][nextColumn] != STATE.BLACK && boolboard[nextRow][nextColumn] != STATE.WHITE) {
                         break;
                     }
 
-                    if (board[nextRow][nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
+                    if (boolboard[nextRow][nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
+                        if(!executeFlip) //don't change the board, just check
+                        {
+                            return true;
+                        }
                         if (log.isTraceEnabled()) {
                             log.trace("Starting to Flip for " + dir);
                         }
@@ -227,7 +195,7 @@ public class Board {
                             if (log.isTraceEnabled()) {
                                 log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
                             }
-                            board[nextRow][nextColumn] = endflip;
+                            boolboard[nextRow][nextColumn] = endflip;
                             flipped = true;
                         }
                         break;
@@ -273,19 +241,19 @@ public class Board {
         return build.toString();
     }
 
-    public static boolean markNextMoves(STATE[][] board, boolean black) {
+    public boolean markNextMoves() {
         boolean marked = false;
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
                 //TODO Optimize possible?
-                if (board[row][column] == null || board[row][column] == STATE.SELECTABLE) {
-                    if (isLegalMove(board, row, column, black)) {
-                        board[row][column] = STATE.SELECTABLE;
+                if (boolboard[row][column] == null || boolboard[row][column] == STATE.SELECTABLE) {
+                    if (isLegalMove(row, column)) {
+                        boolboard[row][column] = STATE.SELECTABLE;
                         marked = true;
                     }
                     else
                     {
-                        board[row][column] = null; //unsets fields that were selectable
+                        boolboard[row][column] = null; //unsets fields that were selectable
                     }
                             
                 } else {
@@ -298,11 +266,7 @@ public class Board {
     }
 
     public LinkedList<BoardMove> getMoves() {
-        return moves;
-    }
-
-    public void setMoves(LinkedList<BoardMove> moves) {
-        this.moves = moves;
+        return new LinkedList<>(moves);
     }
 
     @Override
@@ -314,6 +278,10 @@ public class Board {
         return nextPlayerBlack;
     }
 
+    public STATE[][] getBoolboard() {
+        return boolboard.clone();
+    }
+    
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
