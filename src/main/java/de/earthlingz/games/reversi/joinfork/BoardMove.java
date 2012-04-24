@@ -29,4 +29,30 @@ public final class BoardMove {
     public String toString() {
         return "BoardMove{" + "row=" + row + ", column=" + column + '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final BoardMove other = (BoardMove) obj;
+        if (this.row != other.row) {
+            return false;
+        }
+        if (this.column != other.column) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + this.row;
+        hash = 89 * hash + this.column;
+        return hash;
+    }
 }
