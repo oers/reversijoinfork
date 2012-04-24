@@ -23,8 +23,8 @@ public class BoardMoveTest {
         
         Assert.assertEquals(a, c);
         Assert.assertNotSame(b, c);
-        Assert.assertNotSame(b, null);
-        Assert.assertNotSame(b, new Object());
+        Assert.assertFalse(b.equals(new String[]{null}[0])); //no netbeans warning that equals null is always false (which must not be so!)
+        Assert.assertFalse(b.equals(new Object()));
         
         Assert.assertEquals(a.hashCode(), c.hashCode());
         Assert.assertNotSame(b.hashCode(), c.hashCode());
