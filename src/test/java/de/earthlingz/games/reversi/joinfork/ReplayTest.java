@@ -7,12 +7,9 @@ package de.earthlingz.games.reversi.joinfork;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.Assert;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.log4j.*;
+import org.apache.log4j.spi.LoggingEvent;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,9 +21,11 @@ public class ReplayTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        final ConsoleAppender consoleAppender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
-        consoleAppender.setThreshold(Level.DEBUG);
-        Logger.getRootLogger().addAppender(consoleAppender);
+        //final ConsoleAppender appender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
+        AppenderSkeleton appender = new AppenderSkeletonImpl();
+
+        Logger.getRootLogger().addAppender(appender);
+        Logger.getRootLogger().setLevel(Level.TRACE);
     }
     
     @AfterClass
@@ -36,6 +35,7 @@ public class ReplayTest {
 
     @Test
     public void wipeOut() {
+        Logger.getRootLogger().setLevel(Level.INFO);
         //WOC 2010, round 1
         //TAKIZAWA Masaki 	64
         //TERKELSEN Signe 	0     
@@ -45,6 +45,7 @@ public class ReplayTest {
         Assert.assertEquals("C1".toLowerCase(), b.getLastMove());
         Assert.assertEquals(0, b.getWhiteStones());
         Assert.assertEquals(62, b.getBlackStones()); //2 empty fields     
+        Logger.getRootLogger().setLevel(Level.TRACE);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -111,5 +112,34 @@ public class ReplayTest {
             game = game.substring(2, game.length());
         }
         return moves;
+    }
+
+    /*
+     * does nothing but log happily
+     */
+    private static final class AppenderSkeletonImpl extends AppenderSkeleton {
+
+        public AppenderSkeletonImpl() {
+        }
+
+        @Override
+        public void doAppend(LoggingEvent le) {
+            return;
+        }
+
+        @Override
+        protected void append(LoggingEvent le) {
+            return;
+        }
+
+        @Override
+        public void close() {
+            return;
+        }
+
+        @Override
+        public boolean requiresLayout() {
+            return false;
+        }
     }
 }

@@ -21,12 +21,16 @@ public class WrappedBoard extends Board {
     public WrappedBoard(boolean skipChecks)
     {
         super(skipChecks);
-    }  
+    }
+
+    private WrappedBoard(STATE[][] transpose, boolean pNextPlayerBlack, boolean skipChecks) {
+        super(skipChecks, transpose, pNextPlayerBlack);
+    }
 
     public boolean makeMove(String nextMove) {
 
         if (nextMove == null || nextMove.length() < 1 || !nextMove.matches("[a-hA-H][1-8]")) {
-            markNextMoves(boolboard, nextPlayerBlack);
+            markNextMoves();
             return false;
         }
         nextMove = nextMove.toLowerCase();
@@ -91,7 +95,7 @@ public class WrappedBoard extends Board {
         return build.toString();
     }
 
-    private STATE[][] transpose(String board) {
+    private static STATE[][] transpose(String board) {
         STATE[][] boolBoard = new STATE[8][8];
         Pattern p = Pattern.compile("[a-h][1-8][w|b],");
         Matcher m = p.matcher(board);
@@ -112,12 +116,11 @@ public class WrappedBoard extends Board {
     }
 
     public String getBoard() {
-        return backpose(boolboard);
+        return backpose(getBoolboard());
     }
 
-    public void setBoard(String board, boolean pNextPlayerBlack) {
-        boolboard = transpose(board);
-        nextPlayerBlack = pNextPlayerBlack;
+    public static WrappedBoard createBoard(String board, boolean pNextPlayerBlack) {
+        return new WrappedBoard(transpose(board), pNextPlayerBlack, false);
     }
     
     public static WrappedBoard replay(List<String> moves)
@@ -135,8 +138,8 @@ public class WrappedBoard extends Board {
     }
 
     public String getLastMove() {
-        if (moves.size() > 0) {
-            final BoardMove last = moves.getLast();
+        if (getMoves().size() > 0) {
+            final BoardMove last = getMoves().getLast();
             char first = (char) ((char) last.getColumn() + 'a');
             return "" + first + (last.getRow() + 1);
         }

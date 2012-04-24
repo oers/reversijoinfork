@@ -43,7 +43,7 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.WHITE);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        Board.markNextMoves(b.boolboard, true); //mark available moves
+        b.markNextMoves(); //mark available moves
         
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);
@@ -83,16 +83,16 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.BLACK);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        Board.markNextMoves(b.boolboard, b.isNextPlayerBlack()); //mark available moves
+         b.markNextMoves(); //mark available moves
         
         //all marked fields have to be playable
         for(int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                if(b.boolboard[i][j] == STATE.SELECTABLE)
+                if(b.getBoolboard()[i][j] == STATE.SELECTABLE)
                 {
-                    assertTrue(i +"/" +j + " is not legal but was marked as legal",Board.isLegalMove(b.boolboard, i, j, b.isNextPlayerBlack()));
+                    assertTrue(i +"/" +j + " is not legal but was marked as legal",b.isLegalMove(i, j));
                 }
             }
         }
@@ -110,7 +110,7 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.WHITE);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        Board.markNextMoves(b.boolboard, true); //mark available moves
+        b.markNextMoves(); //mark available moves
         
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);
@@ -150,7 +150,7 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.BLACK);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        Board.markNextMoves(b.boolboard, b.isNextPlayerBlack());
+        b.markNextMoves();
         
         //try this move again
         assertFalse(b.makeMove(2, 3));

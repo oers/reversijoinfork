@@ -80,10 +80,11 @@ public class Board {
             nextPlayerBlack = false;
             boolean canMove = markNextMoves();
             if (!canMove) {
+                nextPlayerBlack = true;
                 canMove = markNextMoves();
                 if (canMove) {
                     if(log.isDebugEnabled()) {log.debug("White has to skip");}
-                    nextPlayerBlack = true;
+                    
                 }
                 else
                 {
@@ -95,10 +96,10 @@ public class Board {
             nextPlayerBlack = true;
             boolean canMove = markNextMoves();
             if (!canMove) {
+                nextPlayerBlack = false;
                 canMove = markNextMoves();
                 if (canMove) {
-                    if(log.isDebugEnabled()) {log.debug("Black has to skip");}
-                    nextPlayerBlack = false;
+                    if(log.isDebugEnabled()) {log.debug("Black has to skip");}                  
                 }
                 else
                 {
