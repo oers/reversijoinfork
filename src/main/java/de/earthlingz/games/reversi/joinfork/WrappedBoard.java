@@ -49,15 +49,16 @@ public class WrappedBoard extends Board {
         Matcher m = p.matcher(getBoard());
         if (m.find()) {
             String state = m.group().substring(2, 3);
-            if ("w".equals(state)) {
-                return STATE.WHITE;
-            } else if ("b".equals(state)) {
-                return STATE.BLACK;
-            } else if ("o".equals(state)) {
-                return STATE.SELECTABLE;
+            switch (state) {
+                case "w":
+                    return STATE.WHITE;
+                case "b":
+                    return STATE.BLACK;
+                case "o":
+                    return STATE.SELECTABLE;
             }
         }
-        return STATE.NOT_SELECTABLE;
+        return null;
     }
 
     public String backpose(STATE[][] board) {

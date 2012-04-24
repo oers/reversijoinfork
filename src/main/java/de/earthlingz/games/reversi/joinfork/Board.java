@@ -16,9 +16,9 @@ public class Board {
 
     public static enum STATE {
 
-        WHITE, BLACK, SELECTABLE, NOT_SELECTABLE
+        WHITE, BLACK, SELECTABLE
     }
-    protected LinkedList<BoardMove> moves = new LinkedList<BoardMove>();
+    protected LinkedList<BoardMove> moves = new LinkedList<>();
     protected STATE[][] boolboard;
     protected boolean nextPlayerBlack = true;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
@@ -57,7 +57,7 @@ public class Board {
         if(log.isDebugEnabled()) {log.debug(move.toString() + "-" + (nextPlayerBlack?"black":"white"));}
 
         //assume that skipCheck = true is only used when you are sure that values passed here are legal Moves
-        if (skipCheck || moves.contains(move)) {
+        if (!skipCheck && moves.contains(move)) {
             log.warn("Move already made: " + move.toString());
             markNextMoves(boolboard, nextPlayerBlack);
             return false;
@@ -252,8 +252,6 @@ public class Board {
                         build.append("w|");
                     } else if (state == STATE.SELECTABLE) {
                         build.append("o|");
-                    }else if (state == STATE.NOT_SELECTABLE) {
-                        build.append("_|");
                     }
                 } else {
                     build.append("_|");
@@ -297,7 +295,7 @@ public class Board {
         return "Board{" + "moves=" + moves + ", board=" + toString(boolboard) + ", lastmove=" + moves.getLast() + ", nextPlayerBlack=" + nextPlayerBlack + '}';
     }
 
-    public boolean getNextPlayerBlack() {
+    public boolean isNextPlayerBlack() {
         return nextPlayerBlack;
     }
 

@@ -1,0 +1,159 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package de.earthlingz.games.reversi.joinfork;
+
+import de.earthlingz.games.reversi.joinfork.Board.STATE;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.junit.*;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author smurawski
+ */
+public class BoardTest {
+    
+    public BoardTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        final ConsoleAppender consoleAppender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
+        consoleAppender.setThreshold(Level.INFO);
+        Logger.getRootLogger().addAppender(consoleAppender);
+    }
+    
+    @AfterClass
+    public static void tearDown() {
+        Logger.getRootLogger().removeAllAppenders();
+    }
+    
+    @Test public void playGameNoChecks()
+    {
+        Board b = new Board(true);
+        //wb
+        //bw     
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        Board.markNextMoves(b.boolboard, true); //mark available moves
+        
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //new possible moves all Black of Course
+        assertEquals("Selectable", b.getState(2, 3), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(4, 5), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(3, 2), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(5, 4), STATE.SELECTABLE);
+        
+        assertEquals(true, b.isNextPlayerBlack());
+        
+        //make Illegal Move and expect an Exception
+        try
+        {
+          assertFalse(b.makeMove(1, 1));
+          fail();
+        }
+        catch (IllegalStateException e)
+        {
+            assertTrue(e.getMessage().startsWith("Did not flip"));
+        }
+        
+        //nothing has changed
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //new possible moves all Black of Course
+        assertEquals("Selectable", b.getState(2, 3), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(4, 5), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(3, 2), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(5, 4), STATE.SELECTABLE);
+        
+        //make Legal Move
+        assertTrue(b.makeMove(2, 3));
+           //nothing has changed
+        assertEquals("Black", b.getState(2, 3), STATE.BLACK);
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.BLACK);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //try this move again
+        try
+        {
+          assertFalse(b.makeMove(2, 3));
+          fail();
+        }
+        catch (IllegalStateException e)
+        {
+            assertTrue(e.getMessage().startsWith("Did not flip"));
+        }
+        
+        //TODO UNDO
+    }
+    
+    @Test public void playGame()
+    {
+        Board b = new Board(false);
+        //wb
+        //bw     
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        Board.markNextMoves(b.boolboard, true); //mark available moves
+        
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //new possible moves all Black of Course
+        assertEquals("Selectable", b.getState(2, 3), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(4, 5), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(3, 2), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(5, 4), STATE.SELECTABLE);
+        
+        assertEquals(true, b.isNextPlayerBlack());
+        
+        //make Illegal Move
+        assertFalse(b.makeMove(1, 1));
+        
+        //nothing has changed
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //new possible moves all Black of Course
+        assertEquals("Selectable", b.getState(2, 3), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(4, 5), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(3, 2), STATE.SELECTABLE);
+        assertEquals("Selectable", b.getState(5, 4), STATE.SELECTABLE);
+        
+        //make Legal Move
+        assertTrue(b.makeMove(2, 3));
+           //nothing has changed
+        assertEquals("Black", b.getState(2, 3), STATE.BLACK); //move we made
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.BLACK);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        //try this move again
+        assertFalse(b.makeMove(2, 3));
+    }
+}
