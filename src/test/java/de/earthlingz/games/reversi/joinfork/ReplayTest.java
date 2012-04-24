@@ -25,7 +25,7 @@ public class ReplayTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         final ConsoleAppender consoleAppender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
-        consoleAppender.setThreshold(Level.INFO);
+        consoleAppender.setThreshold(Level.DEBUG);
         Logger.getRootLogger().addAppender(consoleAppender);
     }
     
@@ -44,7 +44,7 @@ public class ReplayTest {
         b.getBoard();
         Assert.assertEquals("C1".toLowerCase(), b.getLastMove());
         Assert.assertEquals(0, b.getWhiteStones());
-        Assert.assertEquals(62, b.getBlackStones()); //2 empty fields
+        Assert.assertEquals(62, b.getBlackStones()); //2 empty fields     
     }
 
     @Test(expected = IllegalStateException.class)

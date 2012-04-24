@@ -65,10 +65,10 @@ public class Board {
         {
             moves.add(move);
             boolean flipped = flip(boolboard, row, column, nextPlayerBlack ? STATE.BLACK : STATE.WHITE);
-            if(log.isDebugEnabled()) {log.debug("Flipped: " + toString(boolboard));}
             if (!flipped) {
-                throw new IllegalStateException("Did not flip for legal move: " + move.toString());
+                return false;
             }
+            if(log.isDebugEnabled()) {log.debug("Flipped: " + toString(boolboard));}
         } else {
             log.warn("IllegalMove: " + move.toString());
             markNextMoves(boolboard, nextPlayerBlack);
@@ -113,7 +113,7 @@ public class Board {
         return true;
     }
 
-    private static boolean isLegalMove(STATE[][] board, int row, int column, boolean black) {
+    public static boolean isLegalMove(STATE[][] board, int row, int column, boolean black) {
 
         STATE flip;
         STATE endFlip;
@@ -171,19 +171,29 @@ public class Board {
         STATE flip = (endflip == STATE.BLACK) ? STATE.WHITE : STATE.BLACK;
 
         boolean flipped = false;
+        //look for flip in every direction
         for (Direction dir : Direction.values()) {
             int nextRow = row + dir.getHor();
-            if (nextRow == -1 || nextRow == 8) {
+            
+            //we must jump over at least one stone, so certain flips don't need to be evaluated
+            //if the next stone in direction is on directly on the edge rows/columns skip evaluation
+            
+            //read as: if this or the next move in the same vertical direction will be out of bounds --> ignore
+            if (nextRow + dir.getHor() < 0 || nextRow + dir.getHor() > 7) { 
                 continue; //at the end of the board
             }
             int nextColumn = column + dir.getVer();
-            if (nextColumn == -1 || nextColumn == 8) {
+            
+            //read as: if this or the next move in the same horizontal direction will be out of bounds --> ignore
+            if (nextColumn + dir.getVer() < 0 || nextColumn + dir.getVer() > 7) {
                 continue; //at the end of the board
             }
-            if (board[nextRow][nextColumn] == flip) {
+            
+            if (board[nextRow][nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
                 if (log.isTraceEnabled()) {
                     log.trace("Flip candidate found for " + dir);
                 }
+                
                 //can be flipped, if we can find a beginning i.e. stone of other colour in same direction
                 while (true) //can't think of an appropiate recursion end right now
                 {
@@ -200,15 +210,15 @@ public class Board {
                         break;
                     }
 
-                    if (board[nextRow][nextColumn] == endflip) {
+                    if (board[nextRow][nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
                         if (log.isTraceEnabled()) {
                             log.trace("Starting to Flip for " + dir);
                         }
-                        while (!(row == nextRow && column == nextColumn)) //backwards flipping
+                        while (!(row == nextRow && column == nextColumn)) //backwards flipping, flip till we reach the start
                         {
                             nextRow = nextRow - dir.getHor();
                             if (nextRow == -1 || nextRow == 8) {
-                                throw new IllegalStateException("Rushed over last move"); //at the end of the board
+                                throw new IllegalStateException("Couldn't find starting point backflipping"); //at the end of the board
                             }
                             nextColumn = nextColumn - dir.getVer();
                             if (nextColumn == -1 || nextColumn == 8) {
@@ -273,6 +283,11 @@ public class Board {
                         board[row][column] = STATE.SELECTABLE;
                         marked = true;
                     }
+                    else
+                    {
+                        board[row][column] = null; //unsets fields that were selectable
+                    }
+                            
                 } else {
                     continue; //Field is occupied
                 }

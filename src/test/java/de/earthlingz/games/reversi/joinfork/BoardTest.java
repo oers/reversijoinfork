@@ -59,16 +59,9 @@ public class BoardTest {
         assertEquals(true, b.isNextPlayerBlack());
         
         //make Illegal Move and expect an Exception
-        try
-        {
-          assertFalse(b.makeMove(1, 1));
-          fail();
-        }
-        catch (IllegalStateException e)
-        {
-            assertTrue(e.getMessage().startsWith("Did not flip"));
-        }
-        
+
+        assertFalse(b.makeMove(1, 1));
+   
         //nothing has changed
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);
@@ -90,18 +83,21 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.BLACK);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        //try this move again
-        try
-        {
-          assertFalse(b.makeMove(2, 3));
-          fail();
-        }
-        catch (IllegalStateException e)
-        {
-            assertTrue(e.getMessage().startsWith("Did not flip"));
-        }
+        Board.markNextMoves(b.boolboard, b.isNextPlayerBlack()); //mark available moves
         
-        //TODO UNDO
+        //all marked fields have to be playable
+        for(int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if(b.boolboard[i][j] == STATE.SELECTABLE)
+                {
+                    assertTrue(i +"/" +j + " is not legal but was marked as legal",Board.isLegalMove(b.boolboard, i, j, b.isNextPlayerBlack()));
+                }
+            }
+        }
+        //try this move again, should fail
+       assertFalse(b.makeMove(2, 3));  
     }
     
     @Test public void playGame()
@@ -146,12 +142,15 @@ public class BoardTest {
         
         //make Legal Move
         assertTrue(b.makeMove(2, 3));
-           //nothing has changed
+        assertEquals(false, b.isNextPlayerBlack()); //white has next move
+        //nothing has changed
         assertEquals("Black", b.getState(2, 3), STATE.BLACK); //move we made
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);
         assertEquals("White", b.getState(3, 3), STATE.BLACK);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
+        
+        Board.markNextMoves(b.boolboard, b.isNextPlayerBlack());
         
         //try this move again
         assertFalse(b.makeMove(2, 3));

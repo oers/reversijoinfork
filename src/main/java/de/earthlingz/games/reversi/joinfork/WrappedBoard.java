@@ -122,7 +122,7 @@ public class WrappedBoard extends Board {
     
     public static WrappedBoard replay(List<String> moves)
     {
-        WrappedBoard result = new WrappedBoard(false);
+        WrappedBoard result = new WrappedBoard(true); //skip checks
         for(String move : moves)
         {
             boolean res = result.makeMove(move);
