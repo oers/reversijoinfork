@@ -20,7 +20,7 @@ public class Board {
     }
     private LinkedList<BoardMove> moves = new LinkedList<>();
     private STATE[][] boolboard;
-    private boolean nextPlayerBlack = true;
+    private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
 
@@ -186,13 +186,8 @@ public class Board {
                         while (!(row == nextRow && column == nextColumn)) //backwards flipping, flip till we reach the start
                         {
                             nextRow = nextRow - dir.getHor();
-                            if (nextRow == -1 || nextRow == 8) {
-                                throw new IllegalStateException("Couldn't find starting point backflipping"); //at the end of the board
-                            }
                             nextColumn = nextColumn - dir.getVer();
-                            if (nextColumn == -1 || nextColumn == 8) {
-                                throw new IllegalStateException("Rushed over last move"); //at the end of the board
-                            }
+                            
                             if (log.isTraceEnabled()) {
                                 log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
                             }
@@ -272,7 +267,7 @@ public class Board {
 
     @Override
     public String toString() {
-        return "Board{" + "moves=" + moves + ", board=" + toString(boolboard) + ", lastmove=" + moves.getLast() + ", nextPlayerBlack=" + nextPlayerBlack + '}';
+        return "Board{" + "moves=" + moves + ", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.getLast():"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
     }
 
     public boolean isNextPlayerBlack() {
@@ -281,10 +276,5 @@ public class Board {
 
     public STATE[][] getBoolboard() {
         return boolboard.clone();
-    }
-    
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 }

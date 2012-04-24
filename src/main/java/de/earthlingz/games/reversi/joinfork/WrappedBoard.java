@@ -65,7 +65,8 @@ public class WrappedBoard extends Board {
         return null;
     }
 
-    public String backpose(STATE[][] board) {
+    public String backpose() {
+        STATE[][] board = getBoolboard();
         int black = 0;
         int white = 0;
         StringBuilder build = new StringBuilder("");
@@ -116,7 +117,7 @@ public class WrappedBoard extends Board {
     }
 
     public String getBoard() {
-        return backpose(getBoolboard());
+        return backpose();
     }
 
     public static WrappedBoard createBoard(String board, boolean pNextPlayerBlack) {

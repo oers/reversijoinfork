@@ -103,6 +103,7 @@ public class BoardTest {
     @Test public void playGame()
     {
         Board b = new Board(false);
+        b.toString(); // just need to know, that it works
         //wb
         //bw     
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
@@ -151,6 +152,7 @@ public class BoardTest {
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
         b.markNextMoves();
+        b.toString(); // just need to know, that it works
         
         //try this move again
         assertFalse(b.makeMove(2, 3));
