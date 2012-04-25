@@ -4,17 +4,17 @@
  */
 package de.earthlingz.games.reversi.joinfork;
 
-import java.util.*;
 import java.util.Map.Entry;
+import java.util.*;
 import junit.framework.Assert;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.junit.AfterClass;
-import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -49,8 +49,8 @@ public class GameSolverTest {
            //removed last
         WrappedBoard b = WrappedBoard.replay(split("F5F6E6F4G5G6G4E7F3D6F7H3D8D3H4H5D7E3E2D2G3F8C5E8G8B5C4B4C3D1F2C6F1H2B3C2B1C7A5A3A4A6C8B6H7C1E1G2B7A7"));
         b.markNextMoves();
-        SortedMap<Integer, Deque<BoardMove>> result = new GameSolver(new Board(true, b)).getBestMoves();
-        Entry<Integer, Deque<BoardMove>> firstResult = result.entrySet().iterator().next();
+        SortedMap<Integer, List<BoardMove>> result = new GameSolver(new Board(true, b)).getBestMoves();
+        Entry<Integer, List<BoardMove>> firstResult = result.entrySet().iterator().next();
         
         Assert.assertTrue("Still has open moves", b.markNextMoves()); //still has open moves
         Assert.assertEquals("untouched Original", 50, b.getMoves().size()); //still has open moves
@@ -81,15 +81,15 @@ public class GameSolverTest {
         WrappedBoard b = WrappedBoard.replay(split("F5F6E6F4G5G6G4E7F3D6F7H3D8D3H4H5D7E3E2D2G3F8C5E8G8B5C4B4C3D1F2C6F1H2B3C2B1C7A5A3"));
         b.markNextMoves();
         Assert.assertEquals("40 Moves made", 40, b.getMoves().size()); //still has open moves
-        SortedMap<Integer, Deque<BoardMove>> result = new GameSolver(new Board(true, b)).getBestMoves();
-        Entry<Integer, Deque<BoardMove>> firstResult = result.entrySet().iterator().next();
+        SortedMap<Integer, List<BoardMove>> result = new GameSolver(new Board(true, b)).getBestMoves();
+        Entry<Integer, List<BoardMove>> firstResult = result.entrySet().iterator().next();
         
         Assert.assertTrue("Still has open moves", b.markNextMoves()); //still has open moves
         Assert.assertEquals("untouched Original", 40, b.getMoves().size()); //still has open moves
         Assert.assertEquals("10 Moves to be made" + firstResult.getValue(), 20, firstResult.getValue().size()); //still has open moves
         Assert.assertNotSame("No Draw" + firstResult.getKey(), 0, firstResult.getKey()); //still has open moves
         
-        LinkedList<BoardMove> l = new LinkedList<>(firstResult.getValue());
+        ArrayList<BoardMove> l = new ArrayList<>(firstResult.getValue());
         Collections.reverse(l);
         
         for(BoardMove move: l)

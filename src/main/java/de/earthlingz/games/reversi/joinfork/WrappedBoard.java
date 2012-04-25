@@ -123,8 +123,9 @@ public class WrappedBoard extends Board {
     }
 
     public String getLastMove() {
-        if (getMoves().size() > 0) {
-            final BoardMove last = getMoves().getLast();
+        final List<BoardMove> moves = getMoves();
+        if (moves.size() > 0) {
+            final BoardMove last = moves.get(moves.size() -1);
             char first = (char) ((char) last.getColumn() + 'a');
             return "" + first + (last.getRow() + 1);
         }

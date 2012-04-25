@@ -4,11 +4,8 @@
  */
 package de.earthlingz.games.reversi.joinfork;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -28,9 +25,9 @@ public class GameSolver {
     //Ideas: exit any path, that leads to a loss (need to keep track of whom I analyze), may lead to no answers
     //Ideas fast tree structure, get rid of maps etc
     
-    public SortedMap<Integer, Deque<BoardMove>> getBestMoves() {
+    public SortedMap<Integer, List<BoardMove>> getBestMoves() {
         int result = -99999;
-        Deque<BoardMove> moves = new LinkedList<>();
+        List<BoardMove> moves = new ArrayList<>();
         //LOG.info("Move:" + board.getMoves().size());
 
         boolean wasPlayerBlack = board.isNextPlayerBlack();
@@ -48,13 +45,8 @@ public class GameSolver {
             
             copyFor.makeMove(move.getRow(), move.getColumn());
             int localResult;
-            Deque<BoardMove> localMoves = new LinkedList<>();
-            if (copyFor.isFinished()) {
-                if(copyFor.markNextMoves())
-                {
-                    throw new IllegalStateException("More moves possible!: " + copyFor.toString());
-                }
-                
+            List<BoardMove> localMoves = new ArrayList<>();
+            if (copyFor.isFinished()) {              
                 int blackStones = copyFor.getBlackStones();
                 int whiteStones = copyFor.getWhiteStones();
 
@@ -63,9 +55,9 @@ public class GameSolver {
             } else { //Start the recursion!
                 localResult = 0;
                 copyFor.markNextMoves(); //mark before copy, saves time
-                final SortedMap<Integer, Deque<BoardMove>> bestMoves = new GameSolver(copyFor).getBestMoves();
+                final SortedMap<Integer, List<BoardMove>> bestMoves = new GameSolver(copyFor).getBestMoves();
                 
-                for (Entry<Integer, Deque<BoardMove>> madeMoves : bestMoves.entrySet()) //just assume it only contains one result at the moment
+                for (Entry<Integer, List<BoardMove>> madeMoves : bestMoves.entrySet()) //just assume it only contains one result at the moment
                 {
                     localResult = madeMoves.getKey();
                     localMoves = madeMoves.getValue();
@@ -97,7 +89,7 @@ public class GameSolver {
 
         }
 
-        SortedMap<Integer, Deque<BoardMove>> resultMap = new TreeMap<>();
+        SortedMap<Integer, List<BoardMove>> resultMap = new TreeMap<>();
         resultMap.put(Integer.valueOf(result), moves);
         return resultMap;
     }
