@@ -18,12 +18,12 @@ public class Board {
 
         WHITE, BLACK, SELECTABLE
     }
-    private Deque<BoardMove> moves = new LinkedList<>();
+    private List<BoardMove> moves = new ArrayList<>();
     private STATE[] boolboard;
     private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
-    private Set<BoardMove> possibleMoves = new HashSet<>();
+    private Set<BoardMove> possibleMoves;
     
     private int blackStones;
     private int whiteStones;
@@ -297,35 +297,33 @@ public class Board {
     public boolean markNextMoves() {
         boolean marked = false;
         possibleMoves = new HashSet<>();
-        for (int row = 0; row < 8; row++) {
-            for (int column = 0; column < 8; column++) {
-                if (boolboard[row*8 + column] == null || boolboard[row*8 + column] == STATE.SELECTABLE) {
-                    if (isLegalMove(row, column)) {
-                        boolboard[row*8 + column] = STATE.SELECTABLE;
-                        possibleMoves.add(new BoardMove(row, column));
+        for (int i = 0; i < 64; i++) {
+                if (boolboard[i] == null || boolboard[i] == STATE.SELECTABLE) {
+                    if (isLegalMove(i/8, i%8)) {
+                        boolboard[i] = STATE.SELECTABLE;
+                        possibleMoves.add(new BoardMove(i/8, i%8));
                         marked = true;
                     }
                     else
                     {
-                        boolboard[row*8 + column] = null; //unsets fields that were selectable
+                        boolboard[i] = null; //unsets fields that were selectable
                     }
                             
                 } else {
                     continue; //Field is occupied
                 }
-            }
         }
 
         return marked;
     }
 
-    public Deque<BoardMove> getMoves() {
-        return new LinkedList<>(moves);
+    public List<BoardMove> getMoves() {
+        return Collections.unmodifiableList(moves);
     }
 
     @Override
     public String toString() {
-        return "Board{" + "moves=" + moves + ", finished=" + finished +", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.getLast():"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
+        return "Board{" + "moves=" + moves + ", finished=" + finished +", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.get(moves.size() - 1) :"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
     }
 
     public boolean isNextPlayerBlack() {
