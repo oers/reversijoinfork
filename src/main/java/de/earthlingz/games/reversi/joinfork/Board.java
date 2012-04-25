@@ -50,7 +50,7 @@ public class Board {
         skipCheck = pSkipChecks;
         nextPlayerBlack = toCopy.isNextPlayerBlack();
         boolboard =deepCopy(toCopy.boolboard);
-        moves = new LinkedList<>(toCopy.moves);
+        moves = new ArrayList<>(toCopy.moves);
         blackStones = toCopy.getBlackStones();
         whiteStones = toCopy.getWhiteStones();
         finished = toCopy.isFinished();
