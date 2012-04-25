@@ -4,10 +4,7 @@
  */
 package de.earthlingz.games.reversi.joinfork;
 
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +45,24 @@ public class Board {
         whiteStones = 2;
     }
     
+    public Board(boolean pSkipChecks, Board toCopy) {
+        super();
+        skipCheck = pSkipChecks;
+        nextPlayerBlack = toCopy.isNextPlayerBlack();
+        boolboard =deepCopy(toCopy.boolboard);
+        moves = new LinkedList<>(toCopy.moves);
+        blackStones = toCopy.getBlackStones();
+        whiteStones = toCopy.getWhiteStones();
+        finished = toCopy.isFinished();
+        possibleMoves = Collections.unmodifiableSet(toCopy.getPossibleMoves());
+    }
+    
     public Board(boolean pSkipChecks, STATE[][] pBoard, boolean pNextPlayerBlack) {
         blackStones = 0;
         whiteStones = 0;
         skipCheck=pSkipChecks;
         nextPlayerBlack = pNextPlayerBlack;
-        boolboard = pBoard.clone(); //clone is okay, because the values in the arrays are immutable
+        boolboard = deepCopy(pBoard);
         for(int i = 0; i < 8; i++)
         {
             for(int j = 0; j < 8; j++)
@@ -165,7 +174,7 @@ public class Board {
 
         int flipped = 0;
         //look for flip in every direction
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : Direction.getCachedValues()) {
             int nextRow = row + dir.getHor();
             
             //we must jump over at least one stone, so certain flips don't need to be evaluated
@@ -287,7 +296,7 @@ public class Board {
 
     public boolean markNextMoves() {
         boolean marked = false;
-        possibleMoves.clear();
+        possibleMoves = new HashSet<>();
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
                 if (boolboard[row][column] == null || boolboard[row][column] == STATE.SELECTABLE) {
@@ -316,7 +325,7 @@ public class Board {
 
     @Override
     public String toString() {
-        return "Board{" + "moves=" + moves + ", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.getLast():"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
+        return "Board{" + "moves=" + moves + ", finished=" + finished +", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.getLast():"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
     }
 
     public boolean isNextPlayerBlack() {
@@ -324,7 +333,7 @@ public class Board {
     }
 
     public STATE[][] getBoolboard() {
-        return boolboard.clone();
+        return deepCopy(boolboard);
     }
     
     public int getBlackStones() {
@@ -337,11 +346,20 @@ public class Board {
     
     public Set<BoardMove> getPossibleMoves()
     {
-        return new HashSet<>(possibleMoves);
+        return Collections.unmodifiableSet(possibleMoves);
     }
  
     public boolean isFinished()
     {
         return finished;
+    }
+    
+    private STATE[][] deepCopy(STATE[][] boolboard) {
+        STATE[][] result = new STATE[8][8];
+        for(int i = 0; i < 8; i++)
+        {
+            System.arraycopy(boolboard[i], 0, result[i], 0, 8);
+        }
+        return result;
     }
 }

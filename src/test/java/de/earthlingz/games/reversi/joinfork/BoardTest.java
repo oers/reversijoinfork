@@ -45,7 +45,8 @@ public class BoardTest {
         assertEquals("White", b.getState(3, 3), STATE.WHITE);
         assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        b.markNextMoves(); //mark available moves
+        assertTrue(b.markNextMoves()); //mark available moves
+        assertTrue(b.markNextMoves()); //mark available moves, must work twice
         
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);

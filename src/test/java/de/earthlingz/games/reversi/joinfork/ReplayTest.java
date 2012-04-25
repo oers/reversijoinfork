@@ -70,7 +70,7 @@ public class ReplayTest {
     @Test
     public void whiteWin() {
         //    WOC 2010, round 1
-        //    ORTIZ George 	22
+        //    ORTIZ George 	20
         //    BERG Matthias 	44
         WrappedBoard b = WrappedBoard.replay(split("F5F6E6F4G5G6G4E7F3D6F7H3D8D3H4H5D7E3E2D2G3F8C5E8G8B5C4B4C3D1F2C6F1H2B3C2B1C7A5A3A4A6C8B6H7C1E1G2B7A7H6H8B2B8G1H1G7A1A2A8"));
         b.getBoard();
