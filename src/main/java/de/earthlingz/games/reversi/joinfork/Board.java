@@ -4,7 +4,10 @@
  */
 package de.earthlingz.games.reversi.joinfork;
 
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +21,16 @@ public class Board {
 
         WHITE, BLACK, SELECTABLE
     }
-    private LinkedList<BoardMove> moves = new LinkedList<>();
+    private Deque<BoardMove> moves = new LinkedList<>();
     private STATE[][] boolboard;
     private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
+    private Set<BoardMove> possibleMoves = new HashSet<>();
+    
+    private int blackStones;
+    private int whiteStones;
+    private boolean finished = false;
 
     /**
      * Creates a new Othello-Board with starting positions.
@@ -36,12 +44,30 @@ public class Board {
         boolboard[3][3]=STATE.WHITE;//d4
         boolboard[3][4]=STATE.BLACK;//d5
         boolboard[4][3]=STATE.BLACK;//e4
+        blackStones = 2;
+        whiteStones = 2;
     }
     
     public Board(boolean pSkipChecks, STATE[][] pBoard, boolean pNextPlayerBlack) {
+        blackStones = 0;
+        whiteStones = 0;
         skipCheck=pSkipChecks;
         nextPlayerBlack = pNextPlayerBlack;
         boolboard = pBoard.clone(); //clone is okay, because the values in the arrays are immutable
+        for(int i = 0; i < 8; i++)
+        {
+            for(int j = 0; j < 8; j++)
+            {
+                if(boolboard[i][j] == STATE.BLACK)
+                {
+                    blackStones++;
+                }
+                else if(boolboard[i][j] == STATE.WHITE)
+                {
+                    whiteStones++;
+                }
+            }
+        }
     }
 
     /**
@@ -88,6 +114,7 @@ public class Board {
                 }
                 else
                 {
+                    finished = true;
                     if(log.isDebugEnabled()) {log.debug("End of Game");}
                 }
             }
@@ -103,6 +130,7 @@ public class Board {
                 }
                 else
                 {
+                    finished = true;
                     if(log.isDebugEnabled()) {log.debug("End of Game");}
                 }
             }
@@ -135,7 +163,7 @@ public class Board {
     private boolean flip( int row, int column, STATE endflip, boolean executeFlip) {
         STATE flip = (endflip == STATE.BLACK) ? STATE.WHITE : STATE.BLACK;
 
-        boolean flipped = false;
+        int flipped = 0;
         //look for flip in every direction
         for (Direction dir : Direction.values()) {
             int nextRow = row + dir.getHor();
@@ -191,21 +219,41 @@ public class Board {
                             if (log.isTraceEnabled()) {
                                 log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
                             }
-                            boolboard[nextRow][nextColumn] = endflip;
-                            flipped = true;
+                            
+                            //flip and count stones that are not already flipped
+                            if(boolboard[nextRow][nextColumn] != endflip)
+                            {
+                                boolboard[nextRow][nextColumn] = endflip;
+                                flipped++;
+                            }
                         }
                         break;
                     }
                 }
             }
 
-            if (!flipped) {
+            if (flipped == 0) {
                 if (log.isTraceEnabled()) {
                     log.trace(dir + " did not flip");
                 }
             }
         }
-        return flipped;
+        
+        if(executeFlip)
+        {
+            if(flip == STATE.WHITE)
+            {
+                blackStones += flipped;
+                whiteStones -= (flipped - 1); //flipped contains the new stone
+            }
+            else
+            {
+                blackStones -= (flipped - 1); //flipped contains the new stone
+                whiteStones += flipped;
+            }
+        }
+        
+        return flipped > 0;
     }
 
     public STATE getState(int row, int column) {
@@ -239,12 +287,13 @@ public class Board {
 
     public boolean markNextMoves() {
         boolean marked = false;
+        possibleMoves.clear();
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
-                //TODO Optimize possible?
                 if (boolboard[row][column] == null || boolboard[row][column] == STATE.SELECTABLE) {
                     if (isLegalMove(row, column)) {
                         boolboard[row][column] = STATE.SELECTABLE;
+                        possibleMoves.add(new BoardMove(row, column));
                         marked = true;
                     }
                     else
@@ -261,7 +310,7 @@ public class Board {
         return marked;
     }
 
-    public LinkedList<BoardMove> getMoves() {
+    public Deque<BoardMove> getMoves() {
         return new LinkedList<>(moves);
     }
 
@@ -276,5 +325,23 @@ public class Board {
 
     public STATE[][] getBoolboard() {
         return boolboard.clone();
+    }
+    
+    public int getBlackStones() {
+        return blackStones;
+    }
+
+    public int getWhiteStones() {
+        return whiteStones;
+    }
+    
+    public Set<BoardMove> getPossibleMoves()
+    {
+        return new HashSet<>(possibleMoves);
+    }
+ 
+    public boolean isFinished()
+    {
+        return finished;
     }
 }

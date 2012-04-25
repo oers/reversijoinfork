@@ -13,11 +13,7 @@ import java.util.regex.Pattern;
  * @author smurawski
  */
 public class WrappedBoard extends Board {
-
-    private int blackStones = 0;
-    private int whiteStones = 0;
-
-    
+  
     public WrappedBoard(boolean skipChecks)
     {
         super(skipChecks);
@@ -62,8 +58,6 @@ public class WrappedBoard extends Board {
 
     public String backpose() {
         STATE[][] board = getBoolboard();
-        int black = 0;
-        int white = 0;
         StringBuilder build = new StringBuilder("");
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -72,10 +66,8 @@ public class WrappedBoard extends Board {
                     String pos = "" + c + (j + 1);
                     STATE state = board[i][j];
                     if (state == STATE.BLACK) {
-                        black++;
                         build.append(pos).append("b");
                     } else if (state == STATE.WHITE) {
-                        white++;
                         build.append(pos).append("w");
                     } else if (state == STATE.SELECTABLE) {
                         build.append(pos).append("o");
@@ -85,9 +77,6 @@ public class WrappedBoard extends Board {
             }
 
         }
-
-        blackStones = black;
-        whiteStones = white;
         return build.toString();
     }
 
@@ -140,13 +129,5 @@ public class WrappedBoard extends Board {
             return "" + first + (last.getRow() + 1);
         }
         return "start";
-    }
-    
-    public int getBlackStones() {
-        return blackStones;
-    }
-
-    public int getWhiteStones() {
-        return whiteStones;
     }
 }

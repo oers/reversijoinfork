@@ -9,8 +9,10 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.junit.*;
+import org.junit.AfterClass;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
@@ -143,6 +145,9 @@ public class BoardTest {
         
         //make Legal Move
         assertTrue(b.makeMove(2, 3));
+        assertEquals(1, b.getWhiteStones());
+        assertEquals(4, b.getBlackStones());
+        
         assertEquals(false, b.isNextPlayerBlack()); //white has next move
         //nothing has changed
         assertEquals("Black", b.getState(2, 3), STATE.BLACK); //move we made
