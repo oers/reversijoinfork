@@ -93,7 +93,7 @@ public class BoardTest {
         {
             for (int j = 0; j < 8; j++)
             {
-                if(b.getBoolboard()[i][j] == STATE.SELECTABLE)
+                if(b.getBoolboard()[i*8 + j] == STATE.SELECTABLE)
                 {
                     assertTrue(i +"/" +j + " is not legal but was marked as legal",b.isLegalMove(i, j));
                 }

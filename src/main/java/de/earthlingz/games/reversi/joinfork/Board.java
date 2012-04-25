@@ -19,7 +19,7 @@ public class Board {
         WHITE, BLACK, SELECTABLE
     }
     private Deque<BoardMove> moves = new LinkedList<>();
-    private STATE[][] boolboard;
+    private STATE[] boolboard;
     private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
@@ -36,11 +36,11 @@ public class Board {
         super();
         skipCheck = pSkipChecks;
         nextPlayerBlack = true;
-        boolboard = new STATE[8][8];
-        boolboard[4][4]=STATE.WHITE;//e5
-        boolboard[3][3]=STATE.WHITE;//d4
-        boolboard[3][4]=STATE.BLACK;//d5
-        boolboard[4][3]=STATE.BLACK;//e4
+        boolboard = new STATE[64];
+        boolboard[4*8 + 4]=STATE.WHITE;//e5
+        boolboard[3*8 + 3]=STATE.WHITE;//d4
+        boolboard[3*8 + 4]=STATE.BLACK;//d5
+        boolboard[4*8 + 3]=STATE.BLACK;//e4
         blackStones = 2;
         whiteStones = 2;
     }
@@ -57,7 +57,7 @@ public class Board {
         possibleMoves = Collections.unmodifiableSet(toCopy.getPossibleMoves());
     }
     
-    public Board(boolean pSkipChecks, STATE[][] pBoard, boolean pNextPlayerBlack) {
+    public Board(boolean pSkipChecks, STATE[] pBoard, boolean pNextPlayerBlack) {
         blackStones = 0;
         whiteStones = 0;
         skipCheck=pSkipChecks;
@@ -67,11 +67,11 @@ public class Board {
         {
             for(int j = 0; j < 8; j++)
             {
-                if(boolboard[i][j] == STATE.BLACK)
+                if(boolboard[i*8 + j] == STATE.BLACK)
                 {
                     blackStones++;
                 }
-                else if(boolboard[i][j] == STATE.WHITE)
+                else if(boolboard[i*8 + j] == STATE.WHITE)
                 {
                     whiteStones++;
                 }
@@ -191,7 +191,7 @@ public class Board {
                 continue; //at the end of the board
             }
             
-            if (boolboard[nextRow][nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
+            if (boolboard[nextRow*8 + nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
                 if (log.isTraceEnabled()) {
                     log.trace("Flip candidate found for " + dir);
                 }
@@ -208,11 +208,11 @@ public class Board {
                         break; //at the end of the board
                     }
                     //if we find an empty field break;
-                    if (boolboard[nextRow][nextColumn] != STATE.BLACK && boolboard[nextRow][nextColumn] != STATE.WHITE) {
+                    if (boolboard[nextRow*8 + nextColumn] != STATE.BLACK && boolboard[nextRow*8 + nextColumn] != STATE.WHITE) {
                         break;
                     }
 
-                    if (boolboard[nextRow][nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
+                    if (boolboard[nextRow*8 + nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
                         if(!executeFlip) //don't change the board, just check
                         {
                             return true;
@@ -230,9 +230,9 @@ public class Board {
                             }
                             
                             //flip and count stones that are not already flipped
-                            if(boolboard[nextRow][nextColumn] != endflip)
+                            if(boolboard[nextRow*8 + nextColumn] != endflip)
                             {
-                                boolboard[nextRow][nextColumn] = endflip;
+                                boolboard[nextRow*8 + nextColumn] = endflip;
                                 flipped++;
                             }
                         }
@@ -266,17 +266,17 @@ public class Board {
     }
 
     public STATE getState(int row, int column) {
-        return boolboard[row][column];
+        return boolboard[row*8 + column];
     }
 
-    public String toString(STATE[][] board) {
+    public String toString(STATE[] board) {
         StringBuilder build = new StringBuilder("\n");
         build.append("_|a|b|c|d|e|f|g|h|\n");
         for (int i = 0; i < 8; i++) {
             build.append(i+1).append("|");
             for (int j = 0; j < 8; j++) {
-                if (board[i][j] != null) {
-                    STATE state = board[i][j];
+                if (board[i*8 + j] != null) {
+                    STATE state = board[i*8 + j];
                     if (state == STATE.BLACK) {
                         build.append("b|");
                     } else if (state == STATE.WHITE) {
@@ -299,15 +299,15 @@ public class Board {
         possibleMoves = new HashSet<>();
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
-                if (boolboard[row][column] == null || boolboard[row][column] == STATE.SELECTABLE) {
+                if (boolboard[row*8 + column] == null || boolboard[row*8 + column] == STATE.SELECTABLE) {
                     if (isLegalMove(row, column)) {
-                        boolboard[row][column] = STATE.SELECTABLE;
+                        boolboard[row*8 + column] = STATE.SELECTABLE;
                         possibleMoves.add(new BoardMove(row, column));
                         marked = true;
                     }
                     else
                     {
-                        boolboard[row][column] = null; //unsets fields that were selectable
+                        boolboard[row*8 + column] = null; //unsets fields that were selectable
                     }
                             
                 } else {
@@ -332,7 +332,7 @@ public class Board {
         return nextPlayerBlack;
     }
 
-    public STATE[][] getBoolboard() {
+    public STATE[] getBoolboard() {
         return deepCopy(boolboard);
     }
     
@@ -354,12 +354,11 @@ public class Board {
         return finished;
     }
     
-    private STATE[][] deepCopy(STATE[][] boolboard) {
-        STATE[][] result = new STATE[8][8];
-        for(int i = 0; i < 8; i++)
-        {
-            System.arraycopy(boolboard[i], 0, result[i], 0, 8);
-        }
+    private STATE[] deepCopy(STATE[] boolboard) {
+        STATE[] result = new STATE[64];
+
+        System.arraycopy(boolboard, 0, result, 0, 64);
+
         return result;
     }
 }

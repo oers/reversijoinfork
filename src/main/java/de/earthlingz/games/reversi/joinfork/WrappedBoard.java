@@ -19,7 +19,7 @@ public class WrappedBoard extends Board {
         super(skipChecks);
     }
 
-    private WrappedBoard(STATE[][] transpose, boolean pNextPlayerBlack, boolean skipChecks) {
+    private WrappedBoard(STATE[] transpose, boolean pNextPlayerBlack, boolean skipChecks) {
         super(skipChecks, transpose, pNextPlayerBlack);
     }
 
@@ -57,14 +57,14 @@ public class WrappedBoard extends Board {
     }
 
     public String backpose() {
-        STATE[][] board = getBoolboard();
+        STATE[] board = getBoolboard();
         StringBuilder build = new StringBuilder("");
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (board[i][j] != null) {
+                if (board[i*8 + j] != null) {
                     char c = (char) (i + 'a');
                     String pos = "" + c + (j + 1);
-                    STATE state = board[i][j];
+                    STATE state = board[i*8 + j];
                     if (state == STATE.BLACK) {
                         build.append(pos).append("b");
                     } else if (state == STATE.WHITE) {
@@ -80,8 +80,8 @@ public class WrappedBoard extends Board {
         return build.toString();
     }
 
-    private static STATE[][] transpose(String board) {
-        STATE[][] boolBoard = new STATE[8][8];
+    private static STATE[] transpose(String board) {
+        STATE[] boolBoard = new STATE[64];
         Pattern p = Pattern.compile("[a-h][1-8][w|b],");
         Matcher m = p.matcher(board);
         while (m.find()) {
@@ -95,7 +95,7 @@ public class WrappedBoard extends Board {
             char sRow = m.group().charAt(0);
             int column = Integer.parseInt(m.group().substring(1, 2)) - 1;
             int row = sRow - (int) 'a';
-            boolBoard[row][column] = state;
+            boolBoard[row*8 + column] = state;
         }
         return boolBoard;
     }
