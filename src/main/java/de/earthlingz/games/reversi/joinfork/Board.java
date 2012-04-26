@@ -18,7 +18,7 @@ public class Board {
 
         WHITE, BLACK, SELECTABLE
     }
-    private List<BoardMove> moves = new ArrayList<>();
+    private List<BoardMove> moves = new ArrayList<>(60);
     private STATE[] boolboard;
     private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
@@ -50,7 +50,7 @@ public class Board {
         skipCheck = pSkipChecks;
         nextPlayerBlack = toCopy.isNextPlayerBlack();
         boolboard =deepCopy(toCopy.boolboard);
-        moves = new ArrayList<>(toCopy.moves);
+        moves = new ArrayList<>();
         blackStones = toCopy.getBlackStones();
         whiteStones = toCopy.getWhiteStones();
         finished = toCopy.isFinished();
@@ -192,9 +192,9 @@ public class Board {
             }
             
             if (boolboard[nextRow*8 + nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
-                if (log.isTraceEnabled()) {
-                    log.trace("Flip candidate found for " + dir);
-                }
+//                if (log.isTraceEnabled()) {
+//                    log.trace("Flip candidate found for " + dir);
+//                }
                 
                 //can be flipped, if we can find a beginning i.e. stone of other colour in same direction
                 while (true) //can't think of an appropiate recursion end right now
@@ -217,17 +217,17 @@ public class Board {
                         {
                             return true;
                         }
-                        if (log.isTraceEnabled()) {
-                            log.trace("Starting to Flip for " + dir);
-                        }
+//                        if (log.isTraceEnabled()) {
+//                            log.trace("Starting to Flip for " + dir);
+//                        }
                         while (!(row == nextRow && column == nextColumn)) //backwards flipping, flip till we reach the start
                         {
                             nextRow = nextRow - dir.getHor();
                             nextColumn = nextColumn - dir.getVer();
                             
-                            if (log.isTraceEnabled()) {
-                                log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
-                            }
+//                            if (log.isTraceEnabled()) {
+//                                log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
+//                            }
                             
                             //flip and count stones that are not already flipped
                             if(boolboard[nextRow*8 + nextColumn] != endflip)
@@ -242,9 +242,9 @@ public class Board {
             }
 
             if (flipped == 0) {
-                if (log.isTraceEnabled()) {
-                    log.trace(dir + " did not flip");
-                }
+//                if (log.isTraceEnabled()) {
+//                    log.trace(dir + " did not flip");
+//                }
             }
         }
         
@@ -298,20 +298,20 @@ public class Board {
         boolean marked = false;
         possibleMoves = new HashSet<>();
         for (int i = 0; i < 64; i++) {
-                if (boolboard[i] == null || boolboard[i] == STATE.SELECTABLE) {
-                    if (isLegalMove(i/8, i%8)) {
-                        boolboard[i] = STATE.SELECTABLE;
-                        possibleMoves.add(new BoardMove(i/8, i%8));
-                        marked = true;
-                    }
-                    else
-                    {
-                        boolboard[i] = null; //unsets fields that were selectable
-                    }
-                            
-                } else {
-                    continue; //Field is occupied
+            if (boolboard[i] == null || boolboard[i] == STATE.SELECTABLE) {
+                if (isLegalMove(i/8, i%8)) {
+                    boolboard[i] = STATE.SELECTABLE;
+                    possibleMoves.add(new BoardMove(i/8, i%8));
+                    marked = true;
                 }
+                else
+                {
+                    boolboard[i] = null; //unsets fields that were selectable
+                }
+
+            } else {
+                continue; //Field is occupied
+            }
         }
 
         return marked;
@@ -319,6 +319,10 @@ public class Board {
 
     public List<BoardMove> getMoves() {
         return Collections.unmodifiableList(moves);
+    }
+    
+    public void addMoves(List<BoardMove> pMoves) {
+        moves.addAll(pMoves);
     }
 
     @Override
