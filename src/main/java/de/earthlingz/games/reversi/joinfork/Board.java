@@ -18,8 +18,12 @@ public class Board {
 
         WHITE, BLACK, SELECTABLE
     }
+    
+    STATE h8 = null; //save h8 in an additional state (hurray for no unsigned longs in java)
+    
     private List<BoardMove> moves = new ArrayList<>(60);
-    private STATE[] boolboard;
+    private long blackFields = 0; //nothing is set (negative values represent no stone/stone and positive values black/white)
+    private long whiteFields = 0;
     private boolean nextPlayerBlack;
     protected static final Logger log = LoggerFactory.getLogger(Board.class);
     private final boolean skipCheck; //determine whether to check for bad/illegal moves (used for performance)
@@ -36,11 +40,12 @@ public class Board {
         super();
         skipCheck = pSkipChecks;
         nextPlayerBlack = true;
-        boolboard = new STATE[64];
-        boolboard[4*8 + 4]=STATE.WHITE;//e5
-        boolboard[3*8 + 3]=STATE.WHITE;//d4
-        boolboard[3*8 + 4]=STATE.BLACK;//d5
-        boolboard[4*8 + 3]=STATE.BLACK;//e4
+
+        setStone(4, 4, 0);//e5 --> White (Field Occupied)
+        setStone(3, 3, 0);//d4 --> White (Field Occupied)
+        setStone(3, 4, 1);//d5 --> Black (Field Occupied)
+        setStone(4, 3, 1);//e4 --> Black (Field Occupied)
+
         blackStones = 2;
         whiteStones = 2;
     }
@@ -49,7 +54,9 @@ public class Board {
         super();
         skipCheck = pSkipChecks;
         nextPlayerBlack = toCopy.isNextPlayerBlack();
-        boolboard =deepCopy(toCopy.boolboard);
+        blackFields = toCopy.blackFields;
+        whiteFields = toCopy.whiteFields;
+        h8 = toCopy.h8;
         moves = new ArrayList<>();
         blackStones = toCopy.getBlackStones();
         whiteStones = toCopy.getWhiteStones();
@@ -57,27 +64,69 @@ public class Board {
         possibleMoves = Collections.unmodifiableSet(toCopy.getPossibleMoves());
     }
     
-    public Board(boolean pSkipChecks, STATE[] pBoard, boolean pNextPlayerBlack) {
+    public Board(boolean pSkipChecks, long pBoard, long fields, boolean pNextPlayerBlack) {
         blackStones = 0;
         whiteStones = 0;
         skipCheck=pSkipChecks;
         nextPlayerBlack = pNextPlayerBlack;
-        boolboard = deepCopy(pBoard);
+        blackFields = pBoard;
+        whiteFields = fields;
         for(int i = 0; i < 8; i++)
         {
             for(int j = 0; j < 8; j++)
             {
-                if(boolboard[i*8 + j] == STATE.BLACK)
+                if(!isEmpty(i, j) && isStone(i, j, 1))
                 {
                     blackStones++;
                 }
-                else if(boolboard[i*8 + j] == STATE.WHITE)
+                else if(!isEmpty(i, j) && isStone(i, j, 0))
                 {
                     whiteStones++;
                 }
             }
         }
     }
+    
+    protected final boolean isEmpty(int row, int column)
+    {
+        if(row == 7 && column == 7) //h8 is special
+        {
+            return h8 == null;
+        }
+        return ((whiteFields | blackFields) & (1L << (row * 8 + column))) == 0;
+    }
+    
+    protected final boolean isStone( int row, int column, long stone)
+    {
+        if(row == 7 && column == 7) //h8 is special
+        {
+            return h8 == (stone == 1?STATE.BLACK:STATE.WHITE);
+        }
+        else if(stone == 0)
+        {
+           return (whiteFields & (1L << (row * 8 + column))) > 0;
+        }
+        return (blackFields & (1L << (row * 8 + column))) > 0;
+    }
+    
+    protected final void setStone(int row, int column, long flip)
+    {
+        if(row == 7 && column == 7)
+        {
+            h8 = (flip == 1?STATE.BLACK:STATE.WHITE);
+        }
+        else if(flip == 1)
+        {
+            whiteFields = whiteFields & ~(1L << (row * 8 + column));
+            blackFields = blackFields | (1L << (row * 8 + column)); //turn both flags on
+        }
+        else
+        {
+            whiteFields = whiteFields | (1L << (row * 8 + column));
+            blackFields = blackFields & ~(1L << (row * 8 + column));//turn first flag on and second flag off
+        }
+    }
+    
 
     /**
      * 0-based Grid (a=0 ... h = 7, 1 = 0, 8 = 7)
@@ -86,10 +135,10 @@ public class Board {
      * @param column
      */
     public final boolean makeMove(int row, int column) {
-        if(log.isDebugEnabled()) {log.debug("Before: " + toString(boolboard));}
+//        if(log.isDebugEnabled()) {log.debug("Before: " + toStringBoard());}
 
         BoardMove move = new BoardMove(row, column);
-        if(log.isDebugEnabled()) {log.debug(move.toString() + "-" + (nextPlayerBlack?"black":"white"));}
+//        if(log.isDebugEnabled()) {log.debug(move.toString() + "-" + (nextPlayerBlack?"black":"white"));}
 
         //assume that skipCheck = true is only used when you are sure that values passed here are legal Moves
         if (!skipCheck && moves.contains(move)) {
@@ -103,7 +152,7 @@ public class Board {
             if (!flipped) {
                 return false;
             }
-            if(log.isDebugEnabled()) {log.debug("Flipped: " + toString(boolboard));}
+//            if(log.isDebugEnabled()) {log.debug("Flipped: " + toStringBoard());}
         } else {
             log.warn("IllegalMove: " + move.toString());
             markNextMoves();
@@ -118,13 +167,13 @@ public class Board {
                 nextPlayerBlack = true;
                 canMove = markNextMoves();
                 if (canMove) {
-                    if(log.isDebugEnabled()) {log.debug("White has to skip");}
+                    //if(log.isDebugEnabled()) {log.debug("White has to skip");}
                     
                 }
                 else
                 {
                     finished = true;
-                    if(log.isDebugEnabled()) {log.debug("End of Game");}
+                    //if(log.isDebugEnabled()) {log.debug("End of Game");}
                 }
             }
 
@@ -135,18 +184,18 @@ public class Board {
                 nextPlayerBlack = false;
                 canMove = markNextMoves();
                 if (canMove) {
-                    if(log.isDebugEnabled()) {log.debug("Black has to skip");}                  
+                    //if(log.isDebugEnabled()) {log.debug("Black has to skip");}                  
                 }
                 else
                 {
                     finished = true;
-                    if(log.isDebugEnabled()) {log.debug("End of Game");}
+                    //if(log.isDebugEnabled()) {log.debug("End of Game");}
                 }
             }
 
         }
         
-        if(log.isDebugEnabled()) {log.debug("NextPlayer: " + (nextPlayerBlack?"black":"white"));};
+        //if(log.isDebugEnabled()) {log.debug("NextPlayer: " + (nextPlayerBlack?"black":"white"));};
         
         return true;
     }
@@ -169,8 +218,9 @@ public class Board {
      * @param executeFlip if false then only a check is performed, no actual flipping is done
      * @return 
      */
-    private boolean flip( int row, int column, STATE endflip, boolean executeFlip) {
-        STATE flip = (endflip == STATE.BLACK) ? STATE.WHITE : STATE.BLACK;
+    private boolean flip( int row, int column, STATE pEndflip, boolean executeFlip) {
+        long toFlip = (pEndflip == STATE.BLACK) ? 0 : 1;
+        long endflip = (pEndflip == STATE.BLACK) ? 1 : 0;
 
         int flipped = 0;
         //look for flip in every direction
@@ -191,9 +241,10 @@ public class Board {
                 continue; //at the end of the board
             }
             
-            if (boolboard[nextRow*8 + nextColumn] == flip) { //the direction is right, stone of opposite colour in that direction
-//                if (log.isTraceEnabled()) {
-//                    log.trace("Flip candidate found for " + dir);
+//            log.info(nextRow + "/" + nextRow + "/" + isEmpty(nextRow, nextColumn) + "/" + isStone(nextRow, nextColumn, toFlip) + "/" + isStone(nextRow, nextColumn, endflip));
+            if (isStone(nextRow, nextColumn, toFlip)) { //the direction is right, stone of opposite colour in that direction
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Flip candidate found for " + dir);
 //                }
                 
                 //can be flipped, if we can find a beginning i.e. stone of other colour in same direction
@@ -208,31 +259,32 @@ public class Board {
                         break; //at the end of the board
                     }
                     //if we find an empty field break;
-                    if (boolboard[nextRow*8 + nextColumn] != STATE.BLACK && boolboard[nextRow*8 + nextColumn] != STATE.WHITE) {
+                    if (isEmpty(nextRow, nextColumn)) {
                         break;
                     }
 
-                    if (boolboard[nextRow*8 + nextColumn] == endflip) { //found a stone of same colour, lines between can be flipped
+                    if (isStone(nextRow, nextColumn, endflip)) { //found a stone of same colour, lines between can be flipped
+//                       if (log.isDebugEnabled()) {
+//                            log.debug("Possible Move found for Flip " + dir);
+//                        }
                         if(!executeFlip) //don't change the board, just check
                         {
                             return true;
                         }
-//                        if (log.isTraceEnabled()) {
-//                            log.trace("Starting to Flip for " + dir);
-//                        }
+
                         while (!(row == nextRow && column == nextColumn)) //backwards flipping, flip till we reach the start
                         {
                             nextRow = nextRow - dir.getHor();
                             nextColumn = nextColumn - dir.getVer();
                             
-//                            if (log.isTraceEnabled()) {
-//                                log.trace("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
+//                            if (log.isDebugEnabled()) {
+//                                log.debug("Flipped: " + nextColumn + "/" + nextRow + " to " + endflip);
 //                            }
                             
                             //flip and count stones that are not already flipped
-                            if(boolboard[nextRow*8 + nextColumn] != endflip)
+                            if(!isStone(nextRow, nextColumn, endflip))
                             {
-                                boolboard[nextRow*8 + nextColumn] = endflip;
+                                setStone(nextRow, nextColumn, endflip);
                                 flipped++;
                             }
                         }
@@ -242,15 +294,15 @@ public class Board {
             }
 
             if (flipped == 0) {
-//                if (log.isTraceEnabled()) {
-//                    log.trace(dir + " did not flip");
+//                if (log.isDebugEnabled()) {
+//                    log.debug(dir + " did not flip");
 //                }
             }
         }
         
         if(executeFlip)
         {
-            if(flip == STATE.WHITE)
+            if(toFlip == 0) //WHITE
             {
                 blackStones += flipped;
                 whiteStones -= (flipped - 1); //flipped contains the new stone
@@ -266,25 +318,34 @@ public class Board {
     }
 
     public STATE getState(int row, int column) {
-        return boolboard[row*8 + column];
+        if (isStone(row, column, 1)) {
+            return STATE.BLACK;
+        } else if (isStone(row, column, 0)) {
+            return STATE.WHITE;
+        } else {
+            if(possibleMoves != null && possibleMoves.contains(new BoardMove(row, column)))
+            {
+                return STATE.SELECTABLE;
+            }
+            return null;
+        }
     }
 
-    public String toString(STATE[] board) {
+    public String toStringBoard() {
         StringBuilder build = new StringBuilder("\n");
         build.append("_|a|b|c|d|e|f|g|h|\n");
         for (int i = 0; i < 8; i++) {
             build.append(i+1).append("|");
             for (int j = 0; j < 8; j++) {
-                if (board[i*8 + j] != null) {
-                    STATE state = board[i*8 + j];
-                    if (state == STATE.BLACK) {
-                        build.append("b|");
-                    } else if (state == STATE.WHITE) {
-                        build.append("w|");
-                    } else if (state == STATE.SELECTABLE) {
-                        build.append("o|");
-                    }
-                } else {
+                STATE state = getState(i, j);
+                if (state == STATE.BLACK) {
+                    build.append("b|");
+                } else if (state == STATE.WHITE) {
+                    build.append("w|");
+                } else if (state == STATE.SELECTABLE) {
+                    build.append("o|");
+                } else
+                {
                     build.append("_|");
                 }
             }
@@ -298,19 +359,9 @@ public class Board {
         boolean marked = false;
         possibleMoves = new HashSet<>();
         for (int i = 0; i < 64; i++) {
-            if (boolboard[i] == null || boolboard[i] == STATE.SELECTABLE) {
-                if (isLegalMove(i/8, i%8)) {
-                    boolboard[i] = STATE.SELECTABLE;
-                    possibleMoves.add(new BoardMove(i/8, i%8));
-                    marked = true;
-                }
-                else
-                {
-                    boolboard[i] = null; //unsets fields that were selectable
-                }
-
-            } else {
-                continue; //Field is occupied
+            if (isEmpty(i/8, i%8) && isLegalMove(i/8, i%8)) {
+               possibleMoves.add(new BoardMove(i/8, i%8));
+               marked = true;
             }
         }
 
@@ -327,15 +378,15 @@ public class Board {
 
     @Override
     public String toString() {
-        return "Board{" + "moves=" + moves + ", finished=" + finished +", board=" + toString(boolboard) + (moves.size() > 0 ? ", lastmove=" + moves.get(moves.size() - 1) :"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
+        return "Board{" + "moves=" + moves + ", finished=" + finished +", board=" + toStringBoard() + (moves.size() > 0 ? ", lastmove=" + moves.get(moves.size() - 1) :"") + ", nextPlayerBlack=" + nextPlayerBlack + '}';
     }
 
     public boolean isNextPlayerBlack() {
         return nextPlayerBlack;
     }
 
-    public STATE[] getBoolboard() {
-        return deepCopy(boolboard);
+    public long getBoolboard() {
+        return blackFields;
     }
     
     public int getBlackStones() {
@@ -354,13 +405,5 @@ public class Board {
     public boolean isFinished()
     {
         return finished;
-    }
-    
-    private STATE[] deepCopy(STATE[] boolboard) {
-        STATE[] result = new STATE[64];
-
-        System.arraycopy(boolboard, 0, result, 0, 64);
-
-        return result;
     }
 }

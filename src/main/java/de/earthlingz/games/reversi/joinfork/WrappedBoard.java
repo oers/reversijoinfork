@@ -19,8 +19,9 @@ public class WrappedBoard extends Board {
         super(skipChecks);
     }
 
-    private WrappedBoard(STATE[] transpose, boolean pNextPlayerBlack, boolean skipChecks) {
-        super(skipChecks, transpose, pNextPlayerBlack);
+    private WrappedBoard(long transpose, boolean pNextPlayerBlack, boolean skipChecks) {
+        super(skipChecks);
+        //(skipChecks, transpose, pNextPlayerBlack);
     }
 
     public boolean makeMove(String nextMove) {
@@ -31,7 +32,7 @@ public class WrappedBoard extends Board {
         }
         nextMove = nextMove.toLowerCase();
 
-        if(log.isDebugEnabled()) {log.debug(nextMove);};
+        //if(log.isDebugEnabled()) {log.debug(nextMove);};
         
         int column = nextMove.charAt(0) - (int) 'a';
         int row = Integer.parseInt(nextMove.substring(1, 2)) - 1;
@@ -57,14 +58,14 @@ public class WrappedBoard extends Board {
     }
 
     public String backpose() {
-        STATE[] board = getBoolboard();
         StringBuilder build = new StringBuilder("");
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (board[i*8 + j] != null) {
+                STATE state = getState(i, j);
+                if (state != null) {
                     char c = (char) (i + 'a');
                     String pos = "" + c + (j + 1);
-                    STATE state = board[i*8 + j];
+
                     if (state == STATE.BLACK) {
                         build.append(pos).append("b");
                     } else if (state == STATE.WHITE) {
@@ -80,8 +81,8 @@ public class WrappedBoard extends Board {
         return build.toString();
     }
 
-    private static STATE[] transpose(String board) {
-        STATE[] boolBoard = new STATE[64];
+    private static long transpose(String board) {
+        long boolBoard = 0;
         Pattern p = Pattern.compile("[a-h][1-8][w|b],");
         Matcher m = p.matcher(board);
         while (m.find()) {
@@ -95,7 +96,7 @@ public class WrappedBoard extends Board {
             char sRow = m.group().charAt(0);
             int column = Integer.parseInt(m.group().substring(1, 2)) - 1;
             int row = sRow - (int) 'a';
-            boolBoard[row*8 + column] = state;
+            //boolBoard[row*8 + column] = state;
         }
         return boolBoard;
     }
@@ -113,6 +114,7 @@ public class WrappedBoard extends Board {
         WrappedBoard result = new WrappedBoard(true); //skip checks
         for(String move : moves)
         {
+            //log.info(move + ": " + result.toStringBoard());
             boolean res = result.makeMove(move);
             if(!res)
             {
