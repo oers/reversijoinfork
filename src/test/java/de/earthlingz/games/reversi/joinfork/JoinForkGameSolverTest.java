@@ -132,19 +132,16 @@ public class JoinForkGameSolverTest {
             LOG.info("Round " + (i + 1) + "End:" + new Date());
         }
 
-        //0 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 1Begin:Thu Apr 26 12:17:33 CEST 2012
-        //109 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 1End:Thu Apr 26 12:17:33 CEST 2012
-        //109 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 2Begin:Thu Apr 26 12:17:33 CEST 2012
-        //1016 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 2End:Thu Apr 26 12:17:34 CEST 2012
-        //1016 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 3Begin:Thu Apr 26 12:17:34 CEST 2012
-        //4719 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 3End:Thu Apr 26 12:17:38 CEST 2012
-        //4719 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 4Begin:Thu Apr 26 12:17:38 CEST 2012
-        //49096 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 4End:Thu Apr 26 12:18:22 CEST 2012
-        //49096 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 5Begin:Thu Apr 26 12:18:22 CEST 2012
-        //594430 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 5End:Thu Apr 26 12:27:27 CEST 2012
-        //594430 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 6Begin:Thu Apr 26 12:27:27 CEST 2012
-        //9563029 [main] INFO de.earthlingz.games.reversi.joinfork.JoinForkGameSolverTest  - Round 6End:Thu Apr 26 14:56:56 CEST 2012
-
+        //0 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 1Begin:Thu Apr 26 10:40:28 CEST 2012
+        //188 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 1End:Thu Apr 26 10:40:29 CEST 2012
+        //203 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 2Begin:Thu Apr 26 10:40:29 CEST 2012
+        //1968 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 2End:Thu Apr 26 10:40:30 CEST 2012
+        //1968 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 3Begin:Thu Apr 26 10:40:30 CEST 2012
+        //9232 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 3End:Thu Apr 26 10:40:38 CEST 2012
+        //9232 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 4Begin:Thu Apr 26 10:40:38 CEST 2012
+        //93316 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 4End:Thu Apr 26 10:42:02 CEST 2012
+        //93316 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 5Begin:Thu Apr 26 10:42:02 CEST 2012
+        //1109695 [main] INFO de.earthlingz.games.reversi.joinfork.GameSolverTest  - Round 5End:Thu Apr 26 10:58:58 CEST 2012
     }
 
     private List<String> split(String game) {

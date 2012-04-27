@@ -26,7 +26,7 @@ public class BoardTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         final ConsoleAppender consoleAppender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
-        consoleAppender.setThreshold(Level.DEBUG);
+        consoleAppender.setThreshold(Level.INFO);
         Logger.getRootLogger().addAppender(consoleAppender);
     }
     
@@ -35,66 +35,18 @@ public class BoardTest {
         Logger.getRootLogger().removeAllAppenders();
     }
     
-    @Test public void bitmasks()
-    {                       
-        Board b = new Board(true, 0, 0, true);
-        
-        for(int i = 1; i < 8; i++)
-        {
-            for(int j = 1; j < 8; j++)
-            {
-                assertTrue("Empty: " + b.getBoolboard(), b.isEmpty(i, j));
-            }
-        }
-
-        System.out.println((long)1 << 63);
-        
-        //black
-        assertTrue("Empty: " + b.getBoolboard(), b.isEmpty(5, 5));
-        b.setStone(5, 5, 1);
-        assertFalse("Not Empty: " + b.getBoolboard(), b.isEmpty(5, 5));
-        assertTrue("Black: " + b.getBoolboard(), b.isStone(5, 5, 1));
-        assertEquals(STATE.BLACK, b.getState(5, 5));
-        
-        assertTrue("Empty: " + b.toString(), b.isEmpty(0, 0));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(1, 1));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(2, 2));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(3, 3));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(4, 4));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(6, 6));
-        assertTrue("Empty: " + b.toString(), b.isEmpty(7, 7));
-        
-        
-        //white
-        assertTrue("Empty: " + b.toString(), b.isEmpty(6, 6));
-        b.setStone(6, 6, 0);
-        assertFalse("Not Empty: " + b.getBoolboard(), b.isEmpty(6, 6));
-        assertTrue("White:" + b.getBoolboard(), b.isStone(6, 6, 0));
-        assertEquals(STATE.WHITE, b.getState(6, 6));
-        
-        b.setStone(7, 7, 0); //h8 is special
-        assertFalse("Not Empty: " + b.getBoolboard(), b.isEmpty(7, 7));
-        assertEquals(STATE.WHITE, b.getState(7, 7));
-        assertTrue("White:" + b.getBoolboard(), b.isStone(7, 7, 0));
-    }
-    
     @Test public void playGameNoChecks()
     {
         Board b = new Board(true);
         //wb
         //bw     
-        assertEquals("Black " + b, STATE.BLACK, b.getState(3, 4));
-        assertEquals("Black " + b, STATE.BLACK, b.getState(4, 3));
-        assertEquals("White " + b, STATE.WHITE, b.getState(3, 3));
-        assertEquals("White " + b, STATE.WHITE, b.getState(4, 4));
-        assertTrue("Black " + b, b.isStone(3, 4, 1));
-        assertTrue("Black " + b, b.isStone(4, 3, 1));
-        assertTrue("White " + b, b.isStone(3, 3, 0));
-        assertTrue("White " + b, b.isStone(4, 4, 0));
+        assertEquals("Black", b.getState(3, 4), STATE.BLACK);
+        assertEquals("Black", b.getState(4, 3), STATE.BLACK);
+        assertEquals("White", b.getState(3, 3), STATE.WHITE);
+        assertEquals("White", b.getState(4, 4), STATE.WHITE);
         
-        
-        assertTrue("" +b, b.markNextMoves()); //mark available moves
-        assertTrue("" +b, b.markNextMoves()); //mark available moves, must work twice
+        assertTrue(b.markNextMoves()); //mark available moves
+        assertTrue(b.markNextMoves()); //mark available moves, must work twice
         
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);
         assertEquals("Black", b.getState(4, 3), STATE.BLACK);
@@ -137,10 +89,15 @@ public class BoardTest {
          b.markNextMoves(); //mark available moves
         
         //all marked fields have to be playable
-        for(BoardMove move : b.getPossibleMoves())
+        for(int i = 0; i < 8; i++)
         {
-           assertTrue(move+ " is not legal but was marked as legal",b.isLegalMove(move.getRow(), move.getColumn()));
-
+            for (int j = 0; j < 8; j++)
+            {
+                if(b.getBoolboard()[i*8 + j] == STATE.SELECTABLE)
+                {
+                    assertTrue(i +"/" +j + " is not legal but was marked as legal",b.isLegalMove(i, j));
+                }
+            }
         }
         //try this move again, should fail
        assertFalse(b.makeMove(2, 3));  
@@ -192,7 +149,7 @@ public class BoardTest {
         assertEquals(1, b.getWhiteStones());
         assertEquals(4, b.getBlackStones());
         
-        assertEquals(b.toStringBoard(), false, b.isNextPlayerBlack()); //white has next move
+        assertEquals(false, b.isNextPlayerBlack()); //white has next move
         //nothing has changed
         assertEquals("Black", b.getState(2, 3), STATE.BLACK); //move we made
         assertEquals("Black", b.getState(3, 4), STATE.BLACK);

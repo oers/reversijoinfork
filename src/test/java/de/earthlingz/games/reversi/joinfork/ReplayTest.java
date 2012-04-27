@@ -21,8 +21,8 @@ public class ReplayTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        final ConsoleAppender appender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
-        //AppenderSkeleton appender = new AppenderSkeletonImpl();
+        //final ConsoleAppender appender = new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN));
+        AppenderSkeleton appender = new AppenderSkeletonImpl();
 
         Logger.getRootLogger().addAppender(appender);
         Logger.getRootLogger().setLevel(Level.TRACE);
