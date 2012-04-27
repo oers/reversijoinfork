@@ -70,7 +70,7 @@ public class GameSolverTest {
         Assert.assertEquals(44, b.getWhiteStones());
     }
        
-    @Test(timeout=10000) public void whiteWin2() { //10 Seconds TimeOut
+    @Test public void whiteWin2() { //10 Seconds TimeOut
         //    WOC 2010, round 1
         //    ORTIZ George 	22
         //    BERG Matthias 	44
